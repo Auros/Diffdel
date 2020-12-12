@@ -1,0 +1,12 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "Diffdel",
+  "name": "Diffdel",
+  "author": "Auros",
+  "version": "1.0.0",
+  "description": "Hides individual difficulties of a map.",
+  "gameVersion": "1.13.0",
+  "dependsOn": {
+    "BSIPA": "^4.1.3"
+  }
+}
