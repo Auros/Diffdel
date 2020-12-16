@@ -6,15 +6,25 @@ namespace Diffdel
     internal class DiffdelController : IInitializable, IDisposable
     {
         private readonly ButtonText _buttonText;
+        private readonly DiffdelDifficultyControlController _diffdelDifficultyControlController;
 
         public DiffdelController(StandardLevelDetailViewController standardLevelDetailViewController)
         {
-            _buttonText = (Accessors.NPSText(ref Accessors.ParamsPanel(ref Accessors.LevelDetailView(ref standardLevelDetailViewController))) as ButtonText)!;
+            StandardLevelDetailView detailView = Accessors.LevelDetailView(ref standardLevelDetailViewController)!;
+
+            _buttonText = (Accessors.NPSText(ref Accessors.ParamsPanel(ref detailView)) as ButtonText)!;
+            _diffdelDifficultyControlController = (Accessors.DifficultySegment(ref detailView) as DiffdelDifficultyControlController)!;
         }
 
         public void Initialize()
         {
             _buttonText.OnClickEvent += ClickedHiddenText;
+            _diffdelDifficultyControlController.BeatmapSelected += BeatmapSelected;
+        }
+
+        private IDifficultyBeatmap[] BeatmapSelected(IDifficultyBeatmap[] beatmaps)
+        {
+            return beatmaps;
         }
 
         private void ClickedHiddenText()
@@ -25,6 +35,7 @@ namespace Diffdel
         public void Dispose()
         {
             _buttonText.OnClickEvent -= ClickedHiddenText;
+            _diffdelDifficultyControlController.BeatmapSelected -= BeatmapSelected;
         }
     }
 }

@@ -24,9 +24,8 @@ namespace Diffdel
             {
                 var levelDetail = Accessors.LevelDetailView(ref levelDetailViewController);
                 var levelParams = Accessors.ParamsPanel(ref levelDetail);
-                var npsText = Accessors.NPSText(ref levelParams);
-                var upg = npsText.Upgrade<TextMeshProUGUI, ButtonText>();
-                levelParams.SetField<LevelParamsPanel, TextMeshProUGUI>("_notesPerSecondText", upg);
+                Accessors.NPSText(ref levelParams) = Accessors.NPSText(ref levelParams).Upgrade<TextMeshProUGUI, ButtonText>();
+                Accessors.DifficultySegment(ref levelDetail) = Accessors.DifficultySegment(ref levelDetail).Upgrade<BeatmapDifficultySegmentedControlController, DiffdelDifficultyControlController>();
             });
         }
 
