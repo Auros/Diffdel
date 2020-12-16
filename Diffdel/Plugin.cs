@@ -1,13 +1,9 @@
 ﻿using IPA;
 using TMPro;
-using Polyglot;
-using UnityEngine;
+using SiraUtil;
 using IPA.Utilities;
-using UnityEngine.UI;
 using SiraUtil.Zenject;
 using IPALogger = IPA.Logging.Logger;
-using HMUI;
-using SiraUtil;
 
 namespace Diffdel
 {
@@ -31,27 +27,6 @@ namespace Diffdel
                 var npsText = Accessors.NPSText(ref levelParams);
                 var upg = npsText.Upgrade<TextMeshProUGUI, ButtonText>();
                 levelParams.SetField<LevelParamsPanel, TextMeshProUGUI>("_notesPerSecondText", upg);
-
-                /*Button button = ctx.Container.InstantiatePrefabForComponent<Button>(levelDetail.practiceButton);
-                ContentSizeFitter contentSizeFitter = button.gameObject.AddComponent<ContentSizeFitter>();
-                Object.Destroy(button.transform.Find("Content").GetComponent<LayoutElement>());
-                contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-                contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-                LayoutElement element = button.gameObject.GetComponent<LayoutElement>();
-
-                element.preferredWidth = 2f;
-                element.preferredHeight = 10f;
-
-                button.gameObject.transform.SetParent(levelDetail.practiceButton.transform.parent, false);
-
-                LocalizedTextMeshProUGUI localizer = button.GetComponentInChildren<LocalizedTextMeshProUGUI>(true);
-                if (localizer != null)
-                {
-                    Object.Destroy(localizer);
-                }
-
-                TextMeshProUGUI text = button.GetComponentInChildren<TextMeshProUGUI>();
-                text.text = "DD";*/
             });
         }
 
