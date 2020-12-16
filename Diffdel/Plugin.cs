@@ -1,8 +1,9 @@
 ﻿using IPA;
 using TMPro;
 using SiraUtil;
-using IPA.Utilities;
 using SiraUtil.Zenject;
+using IPA.Config.Stores;
+using Conf = IPA.Config.Config;
 using IPALogger = IPA.Logging.Logger;
 
 namespace Diffdel
@@ -13,13 +14,16 @@ namespace Diffdel
         internal static IPALogger? Log { get; private set; }
 
         [Init]
-        public Plugin(IPALogger logger, Zenjector zenjector)
+        public Plugin(Conf conf, IPALogger logger, Zenjector zenjector)
         {
             Log = logger;
-
             zenjector
             .On<MenuInstaller>()
-            .Pseudo((Container) => Container.BindInterfacesTo<DiffdelController>().AsSingle())
+            .Pseudo((Container) =>
+            {
+                Container.BindInstance(conf.Generated<Config>());
+                Container.BindInterfacesTo<DiffdelController>().AsSingle();
+            })
             .Mutate<StandardLevelDetailViewController>((ctx, levelDetailViewController) =>
             {
                 var levelDetail = Accessors.LevelDetailView(ref levelDetailViewController);

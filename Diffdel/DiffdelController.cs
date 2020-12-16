@@ -1,19 +1,25 @@
 ﻿using System;
 using Zenject;
+using System.Collections.Generic;
 
 namespace Diffdel
 {
     internal class DiffdelController : IInitializable, IDisposable
     {
+        private bool _hidElements;
+        private readonly Config _config;
         private readonly ButtonText _buttonText;
+        private readonly StandardLevelDetailView _standardLevelDetailView;
         private readonly DiffdelDifficultyControlController _diffdelDifficultyControlController;
+        private readonly BeatmapCharacteristicSegmentedControlController _beatmapCharacteristicSegmentedControlController;
 
-        public DiffdelController(StandardLevelDetailViewController standardLevelDetailViewController)
+        public DiffdelController(Config config, StandardLevelDetailViewController standardLevelDetailViewController)
         {
-            StandardLevelDetailView detailView = Accessors.LevelDetailView(ref standardLevelDetailViewController)!;
-
-            _buttonText = (Accessors.NPSText(ref Accessors.ParamsPanel(ref detailView)) as ButtonText)!;
-            _diffdelDifficultyControlController = (Accessors.DifficultySegment(ref detailView) as DiffdelDifficultyControlController)!;
+            _config = config;
+            _standardLevelDetailView = Accessors.LevelDetailView(ref standardLevelDetailViewController)!;
+            _buttonText = (Accessors.NPSText(ref Accessors.ParamsPanel(ref _standardLevelDetailView)) as ButtonText)!;
+            _beatmapCharacteristicSegmentedControlController = (Accessors.CharacteristicSegment(ref _standardLevelDetailView))!;
+            _diffdelDifficultyControlController = (Accessors.DifficultySegment(ref _standardLevelDetailView) as DiffdelDifficultyControlController)!;
         }
 
         public void Initialize()
@@ -24,12 +30,51 @@ namespace Diffdel
 
         private IDifficultyBeatmap[] BeatmapSelected(IDifficultyBeatmap[] beatmaps)
         {
+            if (_config.Levels.TryGetValue($"{beatmaps[0].level.levelID}_{_beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName}", out Config.MapSet mapSet))
+            {
+                List<IDifficultyBeatmap> allowedBeatmaps = new List<IDifficultyBeatmap>();
+                foreach (var beatmap in beatmaps)
+                {
+                    if (!mapSet.Difficulties.Contains(beatmap.difficulty))
+                    {
+                        allowedBeatmaps.Add(beatmap);
+                    }
+                }
+                if (allowedBeatmaps.Count == 0)
+                {
+                    SetPlayable(false);
+                    return beatmaps;
+                }
+                if (_hidElements) SetPlayable(true);
+                return allowedBeatmaps.ToArray();
+            }
+            if (_hidElements) SetPlayable(true);
             return beatmaps;
+        }
+
+        private void SetPlayable(bool canPlay)
+        {
+            _standardLevelDetailView.actionButton.transform.parent.gameObject.SetActive(canPlay);
+            _diffdelDifficultyControlController.gameObject.SetActive(canPlay);
+            _hidElements = !canPlay;
         }
 
         private void ClickedHiddenText()
         {
-            Plugin.Log?.Info("clicked");
+            var detail = _standardLevelDetailView;
+            var level = _standardLevelDetailView.selectedDifficultyBeatmap.level;
+            if (!_config.Levels.TryGetValue($"{level.levelID}_{_beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName}", out Config.MapSet mapSet))
+            {
+                mapSet = new Config.MapSet { Name = level.songName };
+                _config.Levels.Add($"{level.levelID}_{_beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName}", mapSet);
+            }
+            mapSet.Difficulties.Add(_standardLevelDetailView.selectedDifficultyBeatmap.difficulty);
+            _config.Changed();
+
+            _standardLevelDetailView.SetContent(level, _standardLevelDetailView.selectedDifficultyBeatmap.difficulty, null,
+                Accessors.Player(ref detail),
+                Accessors.Stats(ref detail)
+                );
         }
 
         public void Dispose()
