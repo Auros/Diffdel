@@ -11,6 +11,9 @@ namespace Diffdel
         [UseConverter(typeof(DictionaryConverter<MapSet>)), NonNullable]
         public virtual Dictionary<string, MapSet> Levels { get; set; } = new Dictionary<string, MapSet>();
 
+        [UseConverter(typeof(ListConverter<BeatmapDifficulty, EnumConverter<BeatmapDifficulty>>)), NonNullable]
+        public virtual List<BeatmapDifficulty> Globals { get; set; } = new List<BeatmapDifficulty>();
+
         public class MapSet
         {
             [NonNullable]

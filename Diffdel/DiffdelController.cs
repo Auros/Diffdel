@@ -1,6 +1,7 @@
 ﻿using System;
 using Zenject;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Diffdel
 {
@@ -30,9 +31,9 @@ namespace Diffdel
 
         private IDifficultyBeatmap[] BeatmapSelected(IDifficultyBeatmap[] beatmaps)
         {
+            List<IDifficultyBeatmap> allowedBeatmaps = new List<IDifficultyBeatmap>();
             if (_config.Levels.TryGetValue($"{beatmaps[0].level.levelID}_{_beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName}", out Config.MapSet mapSet))
             {
-                List<IDifficultyBeatmap> allowedBeatmaps = new List<IDifficultyBeatmap>();
                 foreach (var beatmap in beatmaps)
                 {
                     if (!mapSet.Difficulties.Contains(beatmap.difficulty))
@@ -40,6 +41,7 @@ namespace Diffdel
                         allowedBeatmaps.Add(beatmap);
                     }
                 }
+                allowedBeatmaps = allowedBeatmaps.Where(bm => !_config.Globals.Contains(bm.difficulty)).ToList();
                 if (allowedBeatmaps.Count == 0)
                 {
                     SetPlayable(false);
@@ -48,8 +50,14 @@ namespace Diffdel
                 if (_hidElements) SetPlayable(true);
                 return allowedBeatmaps.ToArray();
             }
+            allowedBeatmaps = beatmaps.Where(bm => !_config.Globals.Contains(bm.difficulty)).ToList();
+            if (allowedBeatmaps.Count == 0)
+            {
+                SetPlayable(false);
+                return beatmaps;
+            }
             if (_hidElements) SetPlayable(true);
-            return beatmaps;
+            return allowedBeatmaps.ToArray();
         }
 
         private void SetPlayable(bool canPlay)

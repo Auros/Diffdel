@@ -17,20 +17,21 @@ namespace Diffdel
         public Plugin(Conf conf, IPALogger logger, Zenjector zenjector)
         {
             Log = logger;
+            var config = conf.Generated<Config>();
             zenjector
-            .On<MenuInstaller>()
-            .Pseudo((Container) =>
-            {
-                Container.BindInstance(conf.Generated<Config>());
-                Container.BindInterfacesTo<DiffdelController>().AsSingle();
-            })
-            .Mutate<StandardLevelDetailViewController>((ctx, levelDetailViewController) =>
-            {
-                var levelDetail = Accessors.LevelDetailView(ref levelDetailViewController);
-                var levelParams = Accessors.ParamsPanel(ref levelDetail);
-                Accessors.NPSText(ref levelParams) = Accessors.NPSText(ref levelParams).Upgrade<TextMeshProUGUI, ButtonText>();
-                Accessors.DifficultySegment(ref levelDetail) = Accessors.DifficultySegment(ref levelDetail).Upgrade<BeatmapDifficultySegmentedControlController, DiffdelDifficultyControlController>();
-            });
+                .On<MenuInstaller>()
+                .Pseudo((Container) =>
+                {
+                    Container.BindInstance(config);
+                    Container.BindInterfacesTo<DiffdelController>().AsSingle();
+                })
+                .Mutate<StandardLevelDetailViewController>((ctx, levelDetailViewController) =>
+                {
+                    var levelDetail = Accessors.LevelDetailView(ref levelDetailViewController);
+                    var levelParams = Accessors.ParamsPanel(ref levelDetail);
+                    Accessors.NPSText(ref levelParams) = Accessors.NPSText(ref levelParams).Upgrade<TextMeshProUGUI, ButtonText>();
+                    Accessors.DifficultySegment(ref levelDetail) = Accessors.DifficultySegment(ref levelDetail).Upgrade<BeatmapDifficultySegmentedControlController, DiffdelDifficultyControlController>();
+                });
         }
 
         [OnEnable, OnDisable]
