@@ -11,12 +11,14 @@ namespace Diffdel
         private readonly Config _config;
         private readonly ButtonText _buttonText;
         private readonly StandardLevelDetailView _standardLevelDetailView;
+        private readonly PlatformLeaderboardViewController _platformLeaderboardViewController;
         private readonly DiffdelDifficultyControlController _diffdelDifficultyControlController;
         private readonly BeatmapCharacteristicSegmentedControlController _beatmapCharacteristicSegmentedControlController;
 
-        public DiffdelController(Config config, StandardLevelDetailViewController standardLevelDetailViewController)
+        public DiffdelController(Config config, PlatformLeaderboardViewController platformLeaderboardViewController, StandardLevelDetailViewController standardLevelDetailViewController)
         {
             _config = config;
+            _platformLeaderboardViewController = platformLeaderboardViewController;
             _standardLevelDetailView = Accessors.LevelDetailView(ref standardLevelDetailViewController)!;
             _buttonText = (Accessors.NPSText(ref Accessors.ParamsPanel(ref _standardLevelDetailView)) as ButtonText)!;
             _beatmapCharacteristicSegmentedControlController = (Accessors.CharacteristicSegment(ref _standardLevelDetailView))!;
@@ -79,10 +81,22 @@ namespace Diffdel
             mapSet.Difficulties.Add(_standardLevelDetailView.selectedDifficultyBeatmap.difficulty);
             _config.Changed();
 
-            _standardLevelDetailView.SetContent(level, _standardLevelDetailView.selectedDifficultyBeatmap.difficulty, null,
+            /*var diffController = _diffdelDifficultyControlController as BeatmapDifficultySegmentedControlController;
+            Accessors.Diffs(ref diffController).Remove(_standardLevelDetailView.selectedDifficultyBeatmap.difficulty);
+            var closestIndex = diffController.GetClosestDifficultyIndex(_standardLevelDetailView.selectedDifficultyBeatmap.difficulty);*/
+
+            var set = level.beatmapLevelData.GetDifficultyBeatmapSet(_beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic).difficultyBeatmaps.Where(diff => !mapSet.Difficulties.Contains(diff.difficulty));
+            if (set.Count() != 0)
+            {
+                _diffdelDifficultyControlController.SetData(set.ToArray(), _standardLevelDetailView.selectedDifficultyBeatmap.difficulty);
+            }
+
+            _standardLevelDetailView.SetContent(level, _diffdelDifficultyControlController.selectedDifficulty, null,
                 Accessors.Player(ref detail),
                 Accessors.Stats(ref detail)
                 );
+            _platformLeaderboardViewController.SetData(_standardLevelDetailView.selectedDifficultyBeatmap);
+
         }
 
         public void Dispose()
